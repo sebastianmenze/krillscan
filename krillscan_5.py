@@ -125,6 +125,8 @@ class Worker_email(QtCore.QThread):
         # password = "raw2nasckrill"
         password =self.config['EMAIL']['pw']
         
+        # breakpoint()
+        
         self.workpath=  os.path.join(self.folder_source,'krill_data')
         
         os.chdir(self.workpath)
@@ -136,22 +138,25 @@ class Worker_email(QtCore.QThread):
                     
             if os.path.isfile('list_of_sent_files.csv'):
                 df_files_sent =  pd.read_csv('list_of_sent_files.csv',index_col=0)
+                ix_done= nasc_done.iloc[:,0].isin( df_files_sent.iloc[:,0]  )  
+                nasc_done=nasc_done[~ix_done]
+            
             else:    
                 df_files_sent=pd.DataFrame([])
                 
-            ix_done= nasc_done.isin( df_files_sent  )  
-            nasc_done=nasc_done[~ix_done]
-            
             nascfile_times=pd.to_datetime( nasc_done.iloc[:,0] ,format='D%Y%m%d-T%H%M%S_nasctable.h5' )
             nasc_done=nasc_done.iloc[np.argsort(nascfile_times),0].values
                  
             n_files=int(self.config['EMAIL']['files_per_email'])
             send_echograms=bool(self.config['EMAIL']['send_echograms'])
             echogram_resolution_in_seconds=str(self.config['EMAIL']['echogram_resolution_in_seconds'])
-            while len(nasc_done)>=n_files & self.keepworking:
+            
+            while (len(nasc_done)>n_files & self.keepworking):
+                
+                print( str(len(nasc_done)) )
                 
                 files_to_send=nasc_done[0:n_files]
-                
+                # print(nasc_done)
                 
                 msg = MIMEMultipart()
                 msg["From"] = emailfrom
@@ -212,16 +217,25 @@ class Worker_email(QtCore.QThread):
                 
                 server.login(emailfrom, password)
                 
+                # print(df_files_sent)
+            
                 try:
-                    server.sendmail(emailfrom, emailto, msg.as_string())
-                    df_files_sent=pd.concat([df_files_sent,pd.DataFrame(files_to_send)])
-                    df_files_sent=df_files_sent.reset_index(drop=True)
+                    server.sendmail(emailfrom, emailto.split(','), msg.as_string())
+                    if len(df_files_sent)>0:
+                        df_files_sent= pd.concat([pd.Series(df_files_sent.iloc[:,0].values),pd.DataFrame(files_to_send)],ignore_index=True)
+                    else:
+                        df_files_sent=pd.DataFrame(files_to_send)
+                        
+                    # df_files_sent=df_files_sent.reset_index(drop=True)
+                    df_files_sent=df_files_sent.drop_duplicates()
                     df_files_sent.to_csv('list_of_sent_files.csv')
+                    
+                    
                     self.logger.info('email sent: ' +   msg["Subject"] )
                     nasc_done=nasc_done[n_files::]
 
                 except Exception as e:
-                    self.logger.info(e)
+                    print(e)
                                         
                 server.quit()
         
