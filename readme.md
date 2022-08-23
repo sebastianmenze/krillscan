@@ -53,10 +53,10 @@ send_echograms = True
 echogram_resolution_in_seconds = 60
 ```
 
-    - Press "Start processing" to scan for old and new .raw files and analyze them
-    - To watch the processing, or watch incoming data in near real-time (10-min steps) tick the checkbox called "Plot realtime"
-    - To plot data from a specific timespan use the "Plot timestamp button"
-    - You can zoom in both plots, the location of the echogram is shown as red line in the map
+- Press "Start processing" to scan for old and new .raw files and analyze them
+- To watch the processing, or watch incoming data in near real-time (10-min steps) tick the checkbox called "Plot realtime"
+- To plot data from a specific timespan use the "Plot timestamp button"
+- You can zoom in both plots, the location of the echogram is shown as red line in the map
 
 
 
@@ -65,7 +65,6 @@ echogram_resolution_in_seconds = 60
 
 
 ![c2](c2.JPG)
-
 
 
 - To let the program automatically send mails with the krill swarm data tick the checkbox called "Send mails"
