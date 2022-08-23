@@ -29,9 +29,20 @@ source_folder = D:/2022807-ANTARCTIC-PROVIDER
 transducer_frequency = 120000.0
 vessel_name = AntPro
 
+[CALIBRATION]
+gain = None
+sa_correction = None
+beam_width_alongship = None
+beam_width_athwartship = None
+angle_offset_alongship = None
+angle_offset_athwartship = None
+
 [GRAPHICS]
 sv_min = -80
 sv_max = -40
+min_speed_in_knots = 5
+nasc_map_max = 10000
+nasc_graph_max = 50000
 
 [EMAIL]
 email_from = myemail@gmail.com
@@ -59,6 +70,7 @@ echogram_resolution_in_seconds = 60
 
 - To let the program automatically send mails with the krill swarm data tick the checkbox called "Send mails"
 - You can choose to just send the Nautical area scattering coefficient (NASC) data for the swarms, or avg. of the echograms. The data is compressed into the HDF-5 format, here is an example:
+
 
 ```
                                lat        lon  ...  bottomdepth_m        nasc
