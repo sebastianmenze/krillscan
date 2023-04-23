@@ -1,33 +1,32 @@
 
 
-<img src="krillscanlogo.png" alt="krillscanlogo" style="zoom:33%;" />
+# Krillscan - A python module for automatic  analysis of backscatter data from fishing vessels to implement feedback management of the Antarctic krill fishery
 
-# Krillscan
+- Automatically processes and analyzes EK60 and EK80 echosounder data 
+- stores echograms and NASC tables as NetCDF, HDF or .csv files
+- detects krill swarms and can send near-real-time acoustic registrations via email
 
-- Automatically process and analyze EK60 and EK80 echosounder data to detect krill swarms
-- Visualize detected krill swarms in real time or manual mode
-- Automatically send real time krill swarm data via email 
+![dataflow](dataflow.JPG)
 
 ## Installation
 
-Krillscan was written in python 3.6 and can be run from the source code or as compiled executable. We added the compiled **krillscan.exe** to the latest distribution in this repository.  
+Krillscan was written in python 3.9 and can be run from the source code, from inside a docker container or as compiled executable. To download the krillscan module with python try:
+```python
+pip install krillscan
+```
 
-## Operation:
+## Operation
 
-Start the program, than:
+### Automatic processing
 
-- Select which folder to scan for .raw files using the button on the upper left
-
-- The default setting is to use the 120 kHz echosounder, if you want to change this:
-
-  - go to "settings" and "edit" and change "transducer_frequency" to your choice
-  - adjust the other setting to your choice and save the file
+Here I describe how to operate krillscan from inside python, instructions for the docker container are found below. After opening a python prompt and installing krillscan, you need to create or download a settings.ini file that tells krillscan where to look for incoming files and where to store processed data and contains processing and data transfer parameters. The file should be a text files following this pattern: 
 
 ```
 [GENERAL]
-source_folder = D:/2022807-ANTARCTIC-PROVIDER
-transducer_frequency = 120000.0
-vessel_name = AntPro
+source_folder = E:\Endurance\2022\raw
+target_folder = E:\Endurance\2022\krillscan
+scrutinization_frequency = 200000.0
+vessel_name = Antarctic Endurance
 
 [CALIBRATION]
 gain = None
@@ -37,58 +36,165 @@ beam_width_athwartship = None
 angle_offset_alongship = None
 angle_offset_athwartship = None
 
-[GRAPHICS]
-sv_min = -80
-sv_max = -40
-min_speed_in_knots = 5
-nasc_map_max = 10000
-nasc_graph_max = 50000
+[PROCESSING]
+sv_SNR_threshold_db = 3
+swarm_sv_threshold_db = -70
+dbdiff_sv_threshold_db = 3
+seafloor_offset_m= 10
+seafloor_sv_threshold_db= -38
+surface_exclusion_depth_m = 20
+maximum_depth_m = 250
 
 [EMAIL]
-email_from = myemail@gmail.com
-email_to = targetemail1@gmail.com, targetemail1@gmail.com
-pw = ***************
-files_per_email = 24
-send_echograms = True
-echogram_resolution_in_seconds = 60
+email_send = 0
+email_from = *Enter a mail address here*
+email_to = *Enter a mail address here*
+pw = *Enter IMAP password address here*
+files_per_email = 6
+send_echograms = 1
+echogram_resolution_in_seconds = 1
 ```
 
-- Press "Start processing" to scan for old and new .raw files and analyze them
-- To watch the processing, or watch incoming data in near real-time (10-min steps) tick the checkbox called "Plot realtime"
-- To plot data from a specific timespan use the "Plot timestamp button"
-- You can zoom in both plots, the location of the echogram is shown as red line in the map
+This location of the settings.ini file must be passed to krillscan when starting the processing. To send emails set email_send=1 (or True).
+
+To start the processing type:
+
+```python
+import krillscan as ks
+ks.krillscan.ks.start('settings.ini')
+# to stop the processing: 
+# ks.krillscan.ks.stop()
+```
+This starts two threads, one that looks for new data, processes and stores it and another that scans for recently processed data and sends them out via email. This is an ad-hoc solution so far, future versions of krillscan will transfer data directly to a cloud storage. 
 
 
+### Output format
 
-![c1](c1.JPG)
-
-
-
-![c2](c2.JPG)
-
-
-- To let the program automatically send mails with the krill swarm data tick the checkbox called "Send mails"
-- You can choose to just send the Nautical area scattering coefficient (NASC) data for the swarms, or avg. of the echograms. The data is compressed into the HDF-5 format, here is an example:
+Krillscan will store the raw and processed echograms, detection masks and NASC tables in 10-min long snippets, with the filename containing the start date of each snippet:
 
 
 ```
-                               lat        lon  ...  bottomdepth_m        nasc
-ping_time                                      ...                           
-2022-02-13 15:52:37.712 -59.871971 -43.997839  ...          499.5    0.000000
-2022-02-13 15:52:38.724 -59.871929 -43.997820  ...          499.5    0.000000
-2022-02-13 15:52:39.714 -59.871881 -43.997802  ...          499.5    0.000000
-2022-02-13 15:52:40.712 -59.871845 -43.997801  ...          499.5    0.000000
-2022-02-13 15:52:41.712 -59.871801 -43.997821  ...          499.5    0.000000
-                           ...        ...  ...            ...         ...
-2022-02-13 16:02:31.713 -59.851249 -44.004235  ...          499.5   10.013148
-2022-02-13 16:02:32.712 -59.851223 -44.004242  ...          499.5   31.948985
-2022-02-13 16:02:33.724 -59.851197 -44.004267  ...          499.5  166.062586
-2022-02-13 16:02:34.713 -59.851174 -44.004299  ...          499.5  376.367236
-2022-02-13 16:02:35.712 -59.851156 -44.004327  ...          499.5  635.794869
-
-[599 rows x 5 columns]
+D20140125-T060417_echogram.nc
+D20140125-T060417_mask_dbdiff.h5
+D20140125-T060417_mask_swarm.h5
+D20140125-T060417_nasctable.csv
+D20140125-T060417_nasctable.h5
+D20140125-T060417_rawechogram.nc
 ```
 
-An email will contain meta data from the sending vessel and the hdf file as attachments:
+Here is an example of the contents of the echogram files, they are stored and read using the xarray module:
+```python
+import xarray as xr
+file="D20140125-T055416_rawechogram.nc"
+xr_sv = xr.open_dataarray(file)
+print(xr_sv)
+```
+```
+<xarray.DataArray (frequency: 2, depth: 1000, time: 427)>
+[854000 values with dtype=float32]
+Coordinates:
+  * time       (time) datetime64[ns] 2014-01-25T05:54:16.770000 ... 2014-01-2...
+  * depth      (depth) float64 0.0 0.5 1.0 1.5 2.0 ... 498.0 498.5 499.0 499.5
+  * frequency  (frequency) float64 3.8e+04 1.2e+05
+```
 
-![c4](c4.JPG)
+Here is an example of the contents of the mask files, they are stored and read as pandas DataFrames:
+
+```python
+import pandas as pd
+file="D20140125-T060417_mask_swarm.h5"
+df = pd.read_hdf(file,key='df')
+print(df)
+```
+```
+2014-01-25 06:04:17.003  False  False  False  False  ...  False  False  False  False
+2014-01-25 06:04:18.405  False  False  False  False  ...  False  False  False  False
+2014-01-25 06:04:19.807  False  False  False  False  ...  False  False  False  False
+2014-01-25 06:04:21.209  False  False  False  False  ...  False  False  False  False
+2014-01-25 06:04:22.611  False  False  False  False  ...  False  False  False  False
+                       ...    ...    ...    ...  ...    ...    ...    ...    ...
+2014-01-25 06:14:09.135  False  False  False  False  ...  False  False  False  False
+2014-01-25 06:14:10.537  False  False  False  False  ...  False  False  False  False
+2014-01-25 06:14:11.949  False  False  False  False  ...  False  False  False  False
+2014-01-25 06:14:13.351  False  False  False  False  ...  False  False  False  False
+2014-01-25 06:14:14.753  False  False  False  False  ...  False  False  False  False
+
+[427 rows x 1000 columns]
+```
+Here is an example of the contents of the NASC tables, they are stored and read as pandas dataframes:
+
+```python
+import pandas as pd
+file="D20140125-T055416_nasctable.h5"
+df = pd.read_hdf(file,key='df')
+print(df.columns)
+print(df)
+```
+```
+Index(['lat', 'lon', 'distance_m', 'bottomdepth_m', 'nasc_swarm',
+       'nasc_dbdiff', 'nasc_manual'],
+      dtype='object')
+                               lat        lon  ...  nasc_dbdiff  nasc_manual
+ping_time                                      ...                          
+2014-01-25 05:54:16.770        NaN        NaN  ...    68.604281          0.0
+2014-01-25 05:54:18.172        NaN        NaN  ...   188.157065          0.0
+2014-01-25 05:54:19.574 -60.010743 -48.319883  ...   223.696955          0.0
+2014-01-25 05:54:20.976 -60.010727 -48.320011  ...    89.158265          0.0
+2014-01-25 05:54:22.378 -60.010712 -48.320137  ...     0.000000          0.0
+                           ...        ...  ...          ...          ...
+2014-01-25 06:04:08.591 -60.004068 -48.374217  ...     0.000000          0.0
+2014-01-25 06:04:09.993 -60.004052 -48.374346  ...   704.198641          0.0
+2014-01-25 06:04:11.395 -60.004037 -48.374469  ...   334.853738          0.0
+2014-01-25 06:04:12.797 -60.004021 -48.374597  ...  1719.993121          0.0
+2014-01-25 06:04:14.199 -60.004004 -48.374726  ...     0.000000          0.0
+
+[427 rows x 7 columns]
+```
+
+Here is an example for 1-month of echosounder data from a krill fishing vessel, processed entirely automatic using the swarm detection method.
+
+![timeseries_endurance_jan2022](timeseries_endurance_jan2022.jpg)
+
+
+### Visual inspection of processed echograms
+
+Krillscan also contains a GUI tool (PyQT5) that lets you inspect the automatically processed echograms and correct the swarm detection masks by adding or removing areas. To start the GUI enter:
+
+```python
+ks.krillscan.ks.inspect()
+```
+
+The GUI looks like this: A  menu bar lets you open processed NetCDF files, show the data folder, undo changes and quite the GUI. The Main window shows the echogram for each 10-min long NetCDF and the ping-by-ping NASC (black line) and 1-min NASC average (blue line). 
+
+![menuebar](menuebar.JPG)
+
+The tool bar below the menu bar has these functions:
+
+- Choose which frequency channel to watch
+- Tick box that lets you check whether to just browse that data or save changes. Whenever you close a 10-min snippet by clicking "next" or "previous" section a new detection mask is stored as HDF file  with the ending "...mask_manual.h5". And the column "nasc_manual" is added to the nasc table file "...nasctable.h5". 
+- You can toggle weather to watch the raw or processed echogram
+- You can set the lower and upper NASC integration boundaries, and color scheme
+- You can go forward or backward in the dataset by pressing next (or press right arrow) or previous (or press left arrow), this opens the next 10-min echogram NetCDF and detection mask
+
+- You can add or remove areas of the detection mask (shown as red overlay) using double clicks to draw a polygon of you choice. Once finished with drawing press enter to apply the change and update the NASC accordingly.
+
+![fig_inspect](fig_inspect.png)
+
+
+
+## Acknowledgements
+
+This software relies on packages and functions developed by the rapidkrill, echopy, pyecholab and echopype projects. We would like to thank the teams for sharing their useful code! We also thank all developers of python and its many open libraries. 
+
+https://github.com/bas-acoustics/rapidkrill
+
+https://echopype.readthedocs.io/en/stable/index.html
+
+https://github.com/bas-acoustics/echopy
+
+https://github.com/CI-CMG/pyEcholab/tree/master/echolab2
+
+
+
+## Run krillscan automatic processing from a Docker container
+

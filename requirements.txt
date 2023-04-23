@@ -1,0 +1,13 @@
+lxml
+numpy
+matplotlib
+pandas
+future
+pyproj
+scikit_image
+scipy
+toml
+geopy
+tables
+xarray
+netcdf4
