@@ -182,6 +182,14 @@ The tool bar below the menu bar has these functions:
 
 
 
+### Data Transfer
+
+So far I have implemented simple email sending as data transfer method. The echogram NetCDF and detection mask Hdf files are down sampled in time to a desired resolution (in setting.ini) and than compressed into a zip file. This is rather efficient, for a 10-min snippet in 1-s resolution the files echogram files are between 10-30 MB (depending on the number of frequencies) but the zip file is only around 800 kB. In addition to the echogram and mask the ping-by-ping NASC table is sent as Hdf file and the setting.ini file. Here is an example:
+
+![mail_content](mail_content.JPG)
+
+You can open and edit these echogram / detection mask files with the inspection GUI, but the "view raw" mode will not work. 
+
 ## Acknowledgements
 
 This software relies on packages and functions developed by the rapidkrill, echopy, pyecholab and echopype projects. We would like to thank the teams for sharing their useful code! We also thank all developers of python and its many open libraries. 
@@ -195,6 +203,4 @@ https://github.com/bas-acoustics/echopy
 https://github.com/CI-CMG/pyEcholab/tree/master/echolab2
 
 
-
-## Run krillscan automatic processing from a Docker container
 
