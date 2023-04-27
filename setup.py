@@ -10,7 +10,7 @@ README = (HERE / "readme.md").read_text()
 # This call to setup() does all the work
 setup(
     name="krillscan",
-    version="0.2.10",
+    version="0.2.17",
     description="A python module for automatic analysis of backscatter data from vessels of opportunity",
     long_description=README,
     long_description_content_type="text/markdown",

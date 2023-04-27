@@ -60,10 +60,10 @@ This location of the settings.ini file must be passed to krillscan when starting
 To start the processing type:
 
 ```python
-import krillscan as ks
-ks.krillscan.ks.start('settings.ini')
+from krillscan import process
+process.ks.start('settings.ini')
 # to stop the processing: 
-# ks.krillscan.ks.stop()
+# process.ks.stop( )
 ```
 This starts two threads, one that looks for new data, processes and stores it and another that scans for recently processed data and sends them out via email. This is an ad-hoc solution so far, future versions of krillscan will transfer data directly to a cloud storage. 
 
@@ -161,7 +161,8 @@ Here is an example for 1-month of echosounder data from a krill fishing vessel, 
 Krillscan also contains a GUI tool (PyQT5) that lets you inspect the automatically processed echograms and correct the swarm detection masks by adding or removing areas. To start the GUI enter:
 
 ```python
-ks.krillscan.ks.inspect()
+from krillscan import inspect
+inspect.gui()
 ```
 
 The GUI looks like this: A  menu bar lets you open processed NetCDF files, show the data folder, undo changes and quite the GUI. The Main window shows the echogram for each 10-min long NetCDF and the ping-by-ping NASC (black line) and 1-min NASC average (blue line). 
