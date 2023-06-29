@@ -1,6 +1,6 @@
 
 
-# Krillscan - A python module for automatic  analysis of backscatter data from fishing vessels to implement feedback management of the Antarctic krill fishery
+# Krillscan - A python module for automatic analysis of backscatter data from fishing vessels to implement feedback management of the Antarctic krill fishery
 
 - Automatically processes and analyzes EK60 and EK80 echosounder data 
 - stores echograms and NASC tables as NetCDF, HDF or .csv files
@@ -44,6 +44,7 @@ seafloor_offset_m= 10
 seafloor_sv_threshold_db= -38
 surface_exclusion_depth_m = 20
 maximum_depth_m = 250
+write_mask_as_csv= False
 
 [EMAIL]
 email_send = 0
@@ -82,7 +83,16 @@ D20140125-T060417_nasctable.h5
 D20140125-T060417_rawechogram.nc
 ```
 
+NASC stands for Nautical area backscattering coefficient has the unit m^2 nmi^-2 and is the vertical integral (sum) of volume backscatter normalized to 1x1 nautical mile area:
+
+```python
+sv_lin=np.power(10, Sv120sw /10)  
+sv_downsampled=  resize_local_mean(sv_lin,[ len(r_new) , Sv120sw.shape[1] ] ,grid_mode =True)
+sa =  integrate.trapezoid(sv_downsampled,sv_dep,axis=0)  
+nasc =  4*np.pi*1852**2 * sa
+```
 Here is an example of the contents of the echogram files, they are stored and read using the xarray module:
+
 ```python
 import xarray as xr
 file="D20140125-T055416_rawechogram.nc"
@@ -98,7 +108,7 @@ Coordinates:
   * frequency  (frequency) float64 3.8e+04 1.2e+05
 ```
 
-Here is an example of the contents of the mask files, they are stored and read as pandas DataFrames:
+Here is an example of the contents of the mask files, they are stored and read as pandas DataFrames. if you want the mask files as csv in addition to hdf you must change settings.ini to "write_mask_as_csv= True". 
 
 ```python
 import pandas as pd
@@ -190,6 +200,17 @@ So far I have implemented simple email sending as data transfer method. The echo
 ![mail_content](mail_content.JPG)
 
 You can open and edit these echogram / detection mask files with the inspection GUI, but the "view raw" mode will not work. 
+
+### Parallel post-processing of data
+
+If you have a lot of raw files that need to be processed, it can be better to use parallel processing instead of the serial real-time processing. This is also implemented in krillscan using the multiprocessing module This will process and store the data in their original file length and not 10-min snippets. To start the parallel post-processing you can use the same ini file, the module will detect the amount of cores available and distribute tasks across all of them.
+
+```python
+from krillscan import process
+process.ks.start_para_processing('settings.ini')
+```
+
+
 
 ## Acknowledgements
 
