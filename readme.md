@@ -44,7 +44,7 @@ seafloor_offset_m= 10
 seafloor_sv_threshold_db= -38
 surface_exclusion_depth_m = 20
 maximum_depth_m = 250
-write_mask_as_csv= False
+write_mask_as_csv= 0
 
 [EMAIL]
 email_send = 0
