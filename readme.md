@@ -210,7 +210,22 @@ from krillscan import process
 process.ks.start_para_processing('settings.ini')
 ```
 
+### Annotation of echograms using custom labels
 
+```python
+from krillscan import inspect_and_annotate
+inspect_and_annotate.gui()
+```
+
+This opens the PyQt5 GUI with an additional line, here you can write up to 7 custom lables into the fields and mark rectangular patches in the echogram using mouse click and release. To remove the latest rectangle use the right mouse click. To save annotations check the "save changes" box and move on to the next snippet. You can toggle if the swarm detection mask should show or not using the "show mask" box. Annotations are saved as .csv for each snippet using UNIX timestamps as left and right border and depth as upper and lower border.
+
+```
+,t1,t2,d1,d2,label
+0,19092.83217844115,19092.83316209359,-241.50554015402548,-62.35334814153828,Predator
+1,19092.83269467859,19092.834692351964,-46.36452080694602,-24.86553958551312,
+```
+
+![ks_with_annot](ks_with_annot.JPG)
 
 ## Acknowledgements
 

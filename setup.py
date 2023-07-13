@@ -10,7 +10,7 @@ README = (HERE / "readme.md").read_text()
 # This call to setup() does all the work
 setup(
     name="krillscan",
-    version="0.2.17",
+    version="0.2.28",
     description="A python module for automatic analysis of backscatter data from vessels of opportunity",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -24,4 +24,4 @@ setup(
     include_package_data=True,
     install_requires=["lxml","numpy","matplotlib","pandas",
     "future","pyproj","scikit_image","scipy","toml","geopy",
-    "tables","xarray","netcdf4"])
+    "tables","xarray","netcdf4","pyqtdarktheme"])
