@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/523694472.svg)](https://zenodo.org/doi/10.5281/zenodo.10078625)
 
 
 # Krillscan - A python module for automatic analysis of backscatter data from fishing vessels to implement feedback management of the Antarctic krill fishery
